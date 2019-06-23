@@ -67,12 +67,13 @@ function execute(PlayerID, Command, ...)
 		end
 		
 		tally = tally + removeGoodByName(player,craft,removables.byName);
-		
-		local nearestFaction = Galaxy():getNearestFaction(Sector():getCoordinates()); --might be nill out in the middle of nowhere.
+
+		local x,y = player:getSectorCoordinates();
+		local nearestFaction = Galaxy():getNearestFaction(x,y); --might be nill out in the middle of nowhere.
 		
 		if tally > 0 and nearestFaction then 
 			Galaxy():changeFactionRelations(player,nearestFaction , rewardFunction(tally) );
-			player:sendChatMessage(nearestFaction.name, ChatMessageType.Information, "Thank your for not dumping cargo in our space, " .. player.name .. "!"); 
+			player:sendChatMessage(nearestFaction.name, ChatMessageType.Normal, "Thank your for not dumping cargo in our space, " .. player.name .. "!"); 
 		end	
 	else
 		player:sendChatMessage("", ChatMessageType.Error, "You are not in a craft and thus cannot remove cargo. " .. player.name);
