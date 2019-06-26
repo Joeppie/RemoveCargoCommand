@@ -71,8 +71,13 @@ function execute(PlayerID, Command, ...)
 		local x,y = player:getSectorCoordinates();
 		local nearestFaction = Galaxy():getNearestFaction(x,y); --might be nill out in the middle of nowhere.
 		
+		local playerFaction = Faction(player.index);
+		
+		print('faction is',playerFaction.name);
+		print('date/time is currently',os.date());
+		
 		if tally > 0 and nearestFaction then 
-			Galaxy():changeFactionRelations(player,nearestFaction , rewardFunction(tally) );
+			Galaxy():changeFactionRelations(nearestFaction,playerFaction,rewardFunction(tally),true,true);
 			player:sendChatMessage(nearestFaction.name, ChatMessageType.Normal, "Thank your for not dumping cargo in our space, " .. player.name .. "!"); 
 		end	
 	else
@@ -107,7 +112,7 @@ function removeGoodByName(player,craft,goodsToRemove)
 					i,j = string.find(string.lower(good.name),string.lower(name));
 					
 					print("match test; i: " , i , " j:" , j )
-					if(i and j and i < j-3) then --a match, and of at least 3 long.
+					if(i and j and i < j-1) then --a match, and of at least 3 long.
 						lastMatch = good; --store match.
 						lastAmount = amount;
 						matches = matches + 1;
@@ -115,11 +120,11 @@ function removeGoodByName(player,craft,goodsToRemove)
 				end
 				
 				if(matches == 1) then
-					tally = tally + performRemoveAndTally(player,craft,lastMatch,lastAmount,amount)
+					tally = tally + performRemoveAndTally(player,craft,lastMatch.name,lastAmount,amount)
 				elseif matches > 1 then
 					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "You might mean more than one possible good by: " .. name .. "please be more specific." );
 				else
-					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "What do you mean '" .. name .. "'? we dont seem to have any in the cargo bay!"  );
+					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "What do you mean remove '" .. name .. "'? How should I know what you mean by that?"  );
 				end
 			end
 	end
@@ -132,11 +137,13 @@ function performRemoveAndTally(player,craft,exactCargoName,cargoAmount,removeAmo
 	local removed = math.max(cargoAmount,removeAmount);
 	player:sendChatMessage("Cargo disposal", ChatMessageType.ServerInfo, " " .. player.name .. " properly disposed of " .. removed .. " " .. description .. " " .. exactCargoName);
 	craft:removeCargo(exactCargoName,removeAmount); --if less than 1 billion, everything is removed.
+	print('removed ', removed)
 	return removed;
 end
 
 --Make it so deleting 1 million cargo gives more than 100 cargo, but doesn't instantly make you admired.
 function rewardFunction(count)
+	print("standing reward for cargo disposal:",math.pow(count,0.5))
 	return math.pow(count,0.5)
 end
 
