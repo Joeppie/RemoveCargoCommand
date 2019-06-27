@@ -20,27 +20,40 @@ function execute(PlayerID, Command, ...)
 	local previousNumber = nil;
 	
 	local tally = 0;
-	
-	local i = 0;
+	local wrongInput;
+	local expectNumber = nil;
+	local specialDone = false;
 	for _,arg in pairs(args) do
-		if arg == "stolen"  then 
+		if not specialDone and arg == "all"  then 
+			player:sendChatMessage("", 0, "Will delete all cargo..");
+			removables.everything = true;
+		elseif not specialDone and arg == "stolen"  then 
 			player:sendChatMessage("", 0, "Will delete stolen cargo..");
 			removables.stolen = true; 
-		elseif arg == "dangerous"  then 
+		elseif not specialDone and arg == "dangerous"  then 
 			player:sendChatMessage("", 0, "Will delete dangerous cargo..");
 			removables.dangerous =true; 
-		elseif arg == "illegal"  then 
+		elseif not specialDone and arg == "illegal"  then 
 			player:sendChatMessage("", 0, "Will delete illegal cargo..");
 			removables.illegal = true;
 		else 
-			if(previousNumber == nil) then
+			specialDone = true; --no longer process special cases above.
+			if expectNumber == nil then expectNumber = true else expectNumber = not expectNumber; end;
+			if(expectNumber) then
 				previousNumber = tonumber(arg) 
+				if previousNumber == nil then
+					player:sendChatMessage("", ChatMessageType.Error, "where '" .. arg .. "' was encountered, a number was instead expected." );
+					wrongInput = true;
+					previousNumber = 0;
+				end
 			else
 				player:sendChatMessage("", 0, "Will delete" .. math.abs(previousNumber) .. " cargo containing the word " .. arg );
 				removables.byName[arg] =  math.abs(previousNumber);
 			end
 		end
 	end
+	
+	if wrongInput then return end;
 	
 	local craft = player.craft;
 	if craft then
@@ -55,14 +68,11 @@ function execute(PlayerID, Command, ...)
 		
 		--Try to delete al stolen, illegal, dangerous or simply all goods, if requested.
 		for good, amount in pairs(craft:getCargos()) do
-				if 	removables.everything then 
-					tally = tally + performRemoveAndTally(player,craft,good.name,amount,amount);				
-				elseif removables.stolen and good.stolen then 
-				    tally = tally + performRemoveAndTally(player,craft,good.name,amount,amount);				
-				elseif removables.illegal and good.illegal then 
-					tally = tally + performRemoveAndTally(player,craft,good.name,amount,amount);				
-				elseif removables.dangerous and good.dangerous then 
-					tally = tally + performRemoveAndTally(player,craft,good.name,amount,amount);				
+				if 	removables.everything  			
+				or( removables.stolen and good.stolen) 			
+				or( removables.illegal and good.illegal)
+				or( removables.dangerous and good.dangerous) then
+					tally = tally + performRemoveAndTally(player,craft,good.name,amount,amount,description);				
 				end
 		end
 		
@@ -107,10 +117,11 @@ function removeGoodByName(player,craft,goodsToRemove)
 				local matches = 0; --people may not have used the exact name, see if we can get a single match.
 				local lastMatch = nil;
 				local lastAmount = nil;
+				local anyCargoAtAll = false;
 				
 				for good, totalAmount in pairs(craft:getCargos()) do 
 					i,j = string.find(string.lower(good.name),string.lower(name));
-					
+					anyCargoAtAll = true;
 					print("match test; i: " , i , " j:" , j )
 					if(i and j and i < j-1) then --a match, and of at least 3 long.
 						lastMatch = good; --store match.
@@ -123,8 +134,12 @@ function removeGoodByName(player,craft,goodsToRemove)
 					tally = tally + performRemoveAndTally(player,craft,lastMatch.name,lastAmount,amount)
 				elseif matches > 1 then
 					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "You might mean more than one possible good by: " .. name .. "please be more specific." );
+				elseif string.len(name) < 3 then
+					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "Please use a longer name, the name '" .. name .. "' is too short."  );
+				elseif not anyCargoAtAll then
+					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "We don't have any more cargo, but perhaps we can toss some crewmen overboard instead of '" .. name .. "' ?");
 				else
-					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "What do you mean remove '" .. name .. "'? How should I know what you mean by that?"  );
+					player:sendChatMessage("Cargo disposal", ChatMessageType.Error, "No cargo seems to match '" .. name .. "'."  );
 				end
 			end
 	end
@@ -134,7 +149,7 @@ end
 
 function performRemoveAndTally(player,craft,exactCargoName,cargoAmount,removeAmount,description)
 	if not description then description = "" end;
-	local removed = math.max(cargoAmount,removeAmount);
+	local removed = math.min(cargoAmount,removeAmount);
 	player:sendChatMessage("Cargo disposal", ChatMessageType.ServerInfo, " " .. player.name .. " properly disposed of " .. removed .. " " .. description .. " " .. exactCargoName);
 	craft:removeCargo(exactCargoName,removeAmount); --if less than 1 billion, everything is removed.
 	print('removed ', removed)
