@@ -22,17 +22,30 @@ Installation only needs to occur on the server, clients do not need to have any 
 1. Extract/copy remove.lua to Avorion/data/scripts/commands (next to e.g. say.lua)
 2. Add an entry to admins.xml so that the normal users i.e. `defaultAuthorizationGroup` are authorized to the command:
 
+	<?xml version="1.0" encoding="utf-8"?>
+	<Administration>
+		<administration>
+			<defaultAuthorizationGroup>
+				<commands>
+					<command name="help"/>
+					<command name="invite"/>
+					<command name="join"/>
+					<command name="leader"/>
+					<command name="leave"/>
+					<command name="players"/>
+					<command name="remove"/> <!-- add this line here-->
+					<command name="seed"/>
+					<command name="selfinfo"/>
+					<command name="suicide"/>
+					<command name="teleporttoship"/>
+					<command name="tmod"/>
+					<command name="trade"/>
+					<command name="version"/>
+					<command name="w"/>
+					<command name="whisper"/>
+				</commands>
+			</defaultAuthorizationGroup>
 
-    `<administration>
-        <defaultAuthorizationGroup>
-            <commands>
-                <command name="help"/>
-                <command name="invite"/>
-        <command name="remove"/> <!-- Add this line, when the server is NOT running, otherwise it overwrites it-->
-         ..other commands..
-                <command name="whisper"/>
-                </commands>
-            </defaultAuthorizationGroup>`
 
 
 # License
