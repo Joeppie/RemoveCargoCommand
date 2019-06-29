@@ -21,6 +21,8 @@ Installation only needs to occur on the server, clients do not need to have any 
 
 1. Extract/copy remove.lua to Avorion/data/scripts/commands (next to e.g. say.lua)
 2. Add an entry to admins.xml so that the normal users i.e. `defaultAuthorizationGroup` are authorized to the command:
+`Warning; if the server is running when editing admins.xml, then the changes will be overwritten by the version in-memory.`
+
 
 ````	<?xml version="1.0" encoding="utf-8"?>
 	<Administration>
