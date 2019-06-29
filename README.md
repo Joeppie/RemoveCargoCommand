@@ -23,7 +23,7 @@ Installation only needs to occur on the server, clients do not need to have any 
 2. Add an entry to admins.xml so that the normal users i.e. `defaultAuthorizationGroup` are authorized to the command:
 
 
-    <administration>
+    `<administration>
         <defaultAuthorizationGroup>
             <commands>
                 <command name="help"/>
@@ -32,7 +32,7 @@ Installation only needs to occur on the server, clients do not need to have any 
          ..other commands..
                 <command name="whisper"/>
                 </commands>
-            </defaultAuthorizationGroup>
+            </defaultAuthorizationGroup>`
 
 
 # License
