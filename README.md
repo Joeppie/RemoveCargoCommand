@@ -22,16 +22,17 @@ Installation only needs to occur on the server, clients do not need to have any 
 1. Extract/copy remove.lua to Avorion/data/scripts/commands (next to e.g. say.lua)
 2. Add an entry to admins.xml so that the normal users i.e. `defaultAuthorizationGroup` are authorized to the command:
 
-	<administration>
-		<defaultAuthorizationGroup>
-			<commands>
-				<command name="help"/>
-				<command name="invite"/>
+
+    <administration>
+        <defaultAuthorizationGroup>
+            <commands>
+                <command name="help"/>
+                <command name="invite"/>
         <command name="remove"/> <!-- Add this line, when the server is NOT running, otherwise it overwrites it-->
          ..other commands..
-				<command name="whisper"/>
-			</commands>
-		</defaultAuthorizationGroup>
+                <command name="whisper"/>
+                </commands>
+            </defaultAuthorizationGroup>
 
 
 # License
